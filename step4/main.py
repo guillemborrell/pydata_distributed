@@ -1,7 +1,14 @@
 import time
+import concurrent.futures
 from flask import Flask, jsonify
 
 application = Flask(__name__)
+executor = concurrent.futures.ProcessPoolExecutor()
+
+
+def expensive_operation():
+    time.sleep(1)
+    return 'Hello from a very expensive blocking task.'
 
 
 @application.route('/')
@@ -11,8 +18,7 @@ def root():
 
 @application.route('/expensive')
 def expensive():
-    time.sleep(1)
-    return jsonify(data='Hello from a very expensive and blocking task.')
+    return jsonify(data=expensive_operation())
 
 
 if __name__ == '__main__':
