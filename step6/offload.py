@@ -11,7 +11,9 @@ class Runner(object):
         self.socket.bind(conn_string)
 
     def rpc_listener(self):
+        print('Wait for message')
         message = self.socket.recv_pyobj()
+        print('Got message')
         result = getattr(self, message['function'])(*message['args'])
         self.socket.send_pyobj(result)
 

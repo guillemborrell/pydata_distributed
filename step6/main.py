@@ -21,7 +21,9 @@ def expensive_operation(q):
     message = dict(function='expensive_operation',
                    args=())
     socket.send_pyobj(message)
+    print("sent message")
     q.put(socket.recv_pyobj())
+    print("recv message")
 
 
 @application.route('/')
