@@ -1,9 +1,12 @@
-import time
+import zmq
 from threading import Thread
 from queue import Queue
 from flask import Flask, jsonify
 
 application = Flask(__name__)
+context = zmq.Context()
+socket = context.socket(zmq.REQ)
+socket.connect('tcp://127.0.0.1:5555')
 
 
 def run_expensive():
@@ -15,8 +18,10 @@ def run_expensive():
 
 
 def expensive_operation(q):
-    time.sleep(1)
-    q.put('Hello from a very expensive blocking task.')
+    message = dict(function='expensive_operation',
+                   args=())
+    socket.send_pyobj(message)
+    q.put(socket.recv_pyobj())
 
 
 @application.route('/')
