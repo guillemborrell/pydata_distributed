@@ -1,19 +1,22 @@
 import time
-import concurrent.futures
+from threading import Thread
+from queue import Queue
 from flask import Flask, jsonify
 
 application = Flask(__name__)
-executor = concurrent.futures.ProcessPoolExecutor(max_workers=4)
 
 
 def run_expensive():
-    future = executor.submit(expensive_operation)
-    return future.result()
+    q = Queue()
+    t = Thread(target=expensive_operation, args=(q,), daemon=True)
+    t.start()
+    t.result = q
+    return t.result.get()
 
 
-def expensive_operation():
+def expensive_operation(q):
     time.sleep(1)
-    return 'Hello from a very expensive blocking task.'
+    q.put('Hello from a very expensive blocking task.')
 
 
 @application.route('/')
