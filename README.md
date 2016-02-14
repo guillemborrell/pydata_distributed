@@ -1,2 +1,3 @@
-# pydata_distributed
-Python for distributed systems. PyData Madrid '16 tutorial.
+# Python for Distributed Systems
+
+PyData Madrid '16 tutorial.
