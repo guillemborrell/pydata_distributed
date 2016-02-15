@@ -4,8 +4,10 @@ from queue import Queue
 from flask import Flask, jsonify
 
 application = Flask(__name__)
+
 context = zmq.Context()
 socket = context.socket(zmq.REQ)
+socket.identity = b'frontend'
 socket.connect('tcp://127.0.0.1:5555')
 
 
