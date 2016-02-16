@@ -3,6 +3,8 @@ Load-balancing broker
 Based on the load balancer of the zeromq guide by Brandon Carpenter
 """
 import zmq
+import time
+
 
 def main():
     """Load balancer main loop."""
@@ -20,8 +22,8 @@ def main():
     poller.register(backend, zmq.POLLIN)
 
     while True:
-        print(workers)
         event = dict(poller.poll())
+
         if backend in event:
             request = backend.recv_multipart()
             worker, empty, client = request[:3]
@@ -39,11 +41,10 @@ def main():
             client, empty, request = frontend.recv_multipart()
             worker = workers.pop(0)
             backend.send_multipart([worker, b"", client, b"", request])
+
             if not workers:
                 poller.unregister(frontend)
 
-
-    # Clean up
     backend.close()
     frontend.close()
     context.term()

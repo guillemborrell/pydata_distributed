@@ -2,30 +2,26 @@ import zmq
 from threading import Thread
 from queue import Queue
 from flask import Flask, jsonify
+import uuid
 
 application = Flask(__name__)
 
 context = zmq.Context()
-socket = context.socket(zmq.REQ)
-socket.identity = b'frontend'
-socket.connect('tcp://127.0.0.1:5555')
 
 
-def run_expensive():
-    q = Queue()
-    t = Thread(target=expensive_operation, args=(q,), daemon=True)
-    t.start()
-    t.result = q
-    return t.result.get()
+def expensive_operation():
+    socket = context.socket(zmq.REQ)
+    socket.identity = str(uuid.uuid4()).encode('utf-8')
+    socket.connect('tcp://127.0.0.1:5555')
 
-
-def expensive_operation(q):
     message = dict(function='expensive_operation',
                    args=())
     socket.send_pyobj(message)
     print("sent message")
-    q.put(socket.recv_pyobj())
+    response = socket.recv_pyobj()
     print("recv message")
+    socket.close()
+    return response
 
 
 @application.route('/')
@@ -35,7 +31,7 @@ def root():
 
 @application.route('/expensive')
 def expensive():
-    result = run_expensive()
+    result = expensive_operation()
     return jsonify(data=result)
 
 
